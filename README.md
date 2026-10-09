@@ -27,4 +27,4 @@
 Python · pandas · scikit-learn（K-Means 聚类 / 逻辑回归）· matplotlib
 
 ## 可视化
-![用户分群](app_cluster.png)
+<img width="800" height="500" alt="app_cluster" src="https://github.com/user-attachments/assets/a782d8e6-ae3a-4d7b-a460-7ab699930958" />
