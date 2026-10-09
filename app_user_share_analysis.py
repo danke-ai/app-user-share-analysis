@@ -8,6 +8,12 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
+# 中文显示
+plt.rcParams["font.sans-serif"] = ["SimHei"]
+plt.rcParams["axes.unicode_minus"] = False
 
 # ========== 1. 读数据 ==========
 df = pd.read_csv("某APP用户信息数据.csv")
@@ -38,3 +44,31 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 model = LogisticRegression().fit(X_train, y_train)
 y_pred = model.predict(X_test)
 print("\n逻辑回归准确率:", round(accuracy_score(y_test, y_pred), 4))
+
+# ========== 5. K-Means 用户分群 ==========
+# 特征标准化（K-Means 对量纲敏感，必须先标准化）
+features = ["在线时长/分钟", "愿意分享概率", "不愿分享概率"]
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(df[features])
+
+# 聚成 3 类
+km = KMeans(n_clusters=3, random_state=42, n_init=10)
+df["群体"] = km.fit_predict(X_scaled)
+
+print("\n各群体特征（均值）：")
+print(df.groupby("群体")[features].mean().round(2))
+print("\n各群体人数：")
+print(df["群体"].value_counts().sort_index())
+print("\n各群体实际分享率：")
+print(df.groupby("群体")["是否点击分享"].mean().round(3))
+
+# ========== 6. 用户分群可视化 ==========
+rate = df.groupby("群体")["是否点击分享"].mean()
+plt.figure(figsize=(8, 5))
+plt.bar(["群体0(不愿分享型)", "群体1(愿意分享型)", "群体2(重度用户)"], rate.values, color="#1f4e79")
+plt.ylabel("分享率")
+plt.title("各用户群体实际分享率")
+plt.tight_layout()
+plt.savefig("app_cluster.png", dpi=100)
+plt.close()
+print("\n图已保存: app_cluster.png")
